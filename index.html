@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Will You Marry Me?</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #f39c12, #e84393);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+            color: #fff;
+            padding: 20px;
+        }
+
+        /* Music Start Overlay Screen */
+        .music-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #e84393, #f39c12);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .music-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .open-btn {
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            background: white;
+            color: #e84393;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+
+        .open-btn:active {
+            transform: scale(0.95);
+        }
+
+        .envelope-text {
+            margin-top: 15px;
+            font-size: 1.2rem;
+            font-style: italic;
+            opacity: 0.9;
+        }
+
+        /* Floating Hearts Background */
+        .hearts-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .heart {
+            position: absolute;
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.4);
+            animation: floatUp 6s linear infinite;
+            bottom: -50px;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-105vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Main Container Card */
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 40px 30px;
+            border-radius: 24px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            z-index: 10;
+            position: relative;
+            transition: all 0.5s ease;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            line-height: 1.4;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .sub-text {
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+
+        /* Button Layouts */
+        .btn-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            min-height: 120px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 14px 40px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            width: 160px;
+            text-align: center;
+        }
+
+        #yesBtn {
+            background: linear-gradient(45deg, #ff007f, #ff7675);
+            color: white;
+            z-index: 11;
+            position: absolute;
+            top: 0;
+        }
+
+        #noBtn {
+            background: linear-gradient(135deg, #e84393, #f39c12); 
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(5px);
+            z-index: 15;
+            position: absolute;
+            top: 0; 
+            transition: top 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), left 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        /* Dynamic Banner Message styling */
+        .toast-msg {
+            background: linear-gradient(45deg, #ff7675, #ef5777);
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-style: italic;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            display: inline-block;
+            margin-top: 25px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            max-width: 90%;
+        }
+
+        .toast-msg.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Final letter design */
+        .letter-content {
+            display: none;
+            text-align: left;
+            line-height: 1.6;
+            font-size: 1.05rem;
+            animation: fadeIn 1.5s ease forwards;
+        }
+
+        .letter-content h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .letter-text {
+            white-space: pre-line;
+            margin-bottom: 25px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="music-overlay" id="musicOverlay">
+        <button class="open-btn" onclick="startEverything()">Open Letter 💌</button>
+        <p class="envelope-text">A special message for Samprikta...</p>
+    </div>
+
+    <audio id="bgMusic" loop>
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="hearts-container" id="hearts"></div>
+
+    <div class="card" id="mainCard">
+        <div id="proposalView">
+            <h1 id="mainQuestion">Will you marry me?<br>Samprikta [shampoo] 💕</h1>
+            <p class="sub-text">From: Saikat bala 💌</p>
+            
+            <div class="btn-container" id="btnContainer">
+                <button class="btn" id="yesBtn" onclick="acceptProposal()">Yes 💕</button>
+                <button class="btn" id="noBtn">No 🥺</button>
+            </div>
+
+            <div>
+                <div class="toast-msg" id="toastMessage">Come on, just say yes na 🥺</div>
+            </div>
+        </div>
+
+        <div id="letterView" class="letter-content">
+            <h2>Yay! I knew you'd say YES! ❤️</h2>
+            <div class="letter-text">My Dearest Shampoo 💗, Thank you for being a part of my life. I can't even begin to describe how happy I am right now. The moment you said "Yes" became one of the most precious moments of my life. Thank you for choosing me and for trusting me with your heart. I promise to love you, respect you, support you, and stand by your side through every smile, every challenge, and every dream we share together. 
+
+You make my world brighter, my days happier, and my future more beautiful. I truly feel like the luckiest person in the world. I love you more than words can express, and I can't wait to create countless memories with you. This is not just a special moment—it's the beginning of our forever. 1000220276.jpg 💍❤️ Forever</div>
+        </div>
+    </div>
+
+    <script>
+        // Generate Ambient Background Hearts
+        const heartsContainer = document.getElementById('hearts');
+        const heartEmojis = ['❤️', '💖', '💝', '💕', '🌸'];
+        
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('heart');
+            heart.innerText = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.animationDuration = Math.random() * 3 + 4 + 's';
+            heart.style.fontSize = Math.random() * 15 + 15 + 'px';
+            heartsContainer.appendChild(heart);
+            
+            setTimeout(() => {
+                heart.remove();
+            }, 7000);
+        }
+        setInterval(createHeart, 400);
+
+        // Dodging No Button logic
+        const noBtn = document.getElementById('noBtn');
+        const container = document.getElementById('btnContainer');
+        const toast = document.getElementById('toastMessage');
+        const music = document.getElementById('bgMusic');
+        const overlay = document.getElementById('musicOverlay');
+        
+        let clickCount = 0;
+        const messages = [
+            "Come on, just say yes na 🥺",
+            "The button ran away because it knows you want to say yes 😉",
+            "Try again... it's not gonna bite 😂",
+            "Even the button knows you wanna say yes 💀",
+            "The audacity... but okay... try again bestie",
+            "Error 404: No button not found 😂",
+            "That's so funny haha. Now say yes. 🙂"
+        ];
+
+        // Triggered when she clicks "Open Letter"
+        function startEverything() {
+            overlay.classList.add('hidden'); // Fades out landing screen
+            playMusic(); // Starts background music immediately
+        }
+
+        function playMusic() {
+            if (music.paused) {
+                music.play().catch(err => console.log("Audio playback error:", err));
+            }
+        }
+
+        function moveButton() {
+            const containerRect = container.getBoundingClientRect();
+            const btnRect = noBtn.getBoundingClientRect();
+
+            const maxX = (containerRect.width / 2) - (btnRect.width / 2);
+            const minX = -((containerRect.width / 2) - (btnRect.width / 2));
+            
+            let randomX = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
+            let randomY = Math.floor(Math.random() * 140) - 40; 
+
+            if (Math.abs(randomX) < 40 && Math.abs(randomY) < 40) {
+                randomX = maxX;
+                randomY = 80;
+            }
+
+            noBtn.style.left = `calc(50% - ${btnRect.width / 2}px + ${randomX}px)`;
+            noBtn.style.top = randomY + 'px';
+
+            toast.innerText = messages[clickCount % messages.length];
+            toast.classList.add('show');
+
+            clickCount++;
+        }
+
+        // Handle interactions for both mobile touch and desktop mice
+        noBtn.addEventListener('mouseenter', moveButton);
+        noBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault(); 
+            moveButton();
+        });
+        noBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            moveButton();
+        });
+
+        // Switch to final letter screen upon selecting Yes
+        function acceptProposal() {
+            document.getElementById('proposalView').style.display = 'none';
+            document.getElementById('letterView').style.display = 'block';
+            document.getElementById('mainCard').style.maxWidth = '650px';
+            
+            for(let i=0; i<30; i++){
+                setTimeout(createHeart, i * 50);
+            }
+        }
+    </script>
+</body>
+</html>
+
